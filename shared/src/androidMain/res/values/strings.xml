@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      离线下载通知渠道名。Media3 DownloadService 建通知渠道时按此资源 ID 取字符串，
+      缺失（或传 0）会触发 Resources$NotFoundException 并崩溃在服务主线程（见下载闪退排查）。
+      与 MediaDownloadService.onCreate 自建渠道用的字面量「离线下载」保持一致。
+    -->
+    <string name="download_channel_name">离线下载</string>
+</resources>

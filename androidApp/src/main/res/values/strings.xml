@@ -1,0 +1,4 @@
+<resources>
+    <!-- 启动器显示名。刻意不用英文项目名：目标用户是本机中文环境，图标下显示 AggregatedPlayer 不表意 -->
+    <string name="app_name">站点聚合播放器</string>
+</resources>

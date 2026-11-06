@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      离线下载前台服务（阶段 4-D）。放在 shared：下载单例与 Service 同模块，避免 shared 反向依赖 app。
+      前台服务类型 dataSync 是 Android 14 强制要求；低版本忽略此属性。
+      前台服务、通知、前台数据同步权限已在 app 的 AndroidManifest 声明，这里只登记组件。
+    -->
+    <!-- 跨重启续传：PlatformScheduler 用 JobScheduler 在开机后自动恢复下载队列 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application>
+        <!--
+          Media3 DownloadService 强制要求两条 meta-data，否则建通知渠道时资源 ID 取默认 0，
+          getString(0) 崩在服务主线程（下载闪退根因）。small icon 用系统内置下载图标，
+          channel name 指向本模块 strings 资源（与构造参数双保险，覆盖 Media3 不同版本的读取路径）。
+        -->
+        <service
+            android:name="org.aggregated.player.platform.MediaDownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync">
+            <intent-filter>
+                <action android:name="androidx.media3.exoplayer.download.DownloadService" />
+            </intent-filter>
+            <meta-data
+                android:name="androidx.media3.exoplayer.offline.DownloadService.foreground_notification_small_icon"
+                android:resource="@android:drawable/stat_sys_download" />
+            <meta-data
+                android:name="androidx.media3.exoplayer.offline.DownloadService.notification_channel_name"
+                android:resource="@string/download_channel_name" />
+        </service>
+
+        <!-- PlatformScheduler 的 JobService 宿主：Media3 用它接收 JobScheduler 回调以恢复下载。
+             BIND_JOB_SERVICE 权限是系统级、声明即可，无需运行时申请。 -->
+        <service
+            android:name="androidx.media3.exoplayer.scheduler.PlatformScheduler$PlatformSchedulerService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+    </application>
+
+</manifest>

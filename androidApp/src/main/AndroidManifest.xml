@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      权限清单（设计文档 §4.2、§4.6）。
+      原则：只在功能真正需要时申请，能后置的一律留到对应阶段，避免首装就要一堆权限。
+      阶段 0 只加载 WebView 所需的最小集合。
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!--
+      阶段 4 后台下载（Media3 DownloadManager 离线缓存）所需权限。
+      FOREGROUND_SERVICE / FOREGROUND_SERVICE_DATA_SYNC：下载经 DownloadService 前台服务保活（Android 14 起必须声明 dataSync 类型）。
+      POST_NOTIFICATIONS：Android 13+ 危险权限，需在运行时申请（见 SniffedMediaRow 下载入口）；未授权时 Android 14 会拒绝 startForeground，故入口前置检查。
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+      TODO(阶段2: 点级标记使用「应用内覆盖层」，因此不需要 SYSTEM_ALERT_WINDOW —— 见 §4.3)
+    -->
+
+    <!--
+      allowBackup=false 是加固项：站点表 / 规则 / 设置存在应用私有目录，开启备份会被系统
+      （或 adb backup）整体拷走，minSdk 24 上还可能被其他应用读取。
+      代价：换机不会自动迁移本地数据（站点与规则可手动重配）。
+    -->
+    <application
+        android:name=".PlayerApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+
+        <!--
+          configChanges：由 Activity 自己处理这些变化。
+          WebView 重配置会丢页面状态（等于重新加载），与「后台保活」需求直接冲突，必须避开默认重建行为。
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

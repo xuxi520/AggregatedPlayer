@@ -1,0 +1,31 @@
+# 编码规范的机器可执行部分（设计文档 §5.1）。
+# 人读的规范写在《项目初始设计.md》第 5 节，这里只放 IDE 能强制的东西，避免两处描述打架。
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.{kt,kts}]
+indent_size = 4
+continuation_indent_size = 4
+max_line_length = 120
+# Kotlin 官方约定：禁止 tab、要求大括号同行
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+ij_kotlin_imports_layout = *
+ij_kotlin_packages_to_use_import_on_demand = unset
+
+[*.{xml,json}]
+indent_size = 2
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.md]
+# Markdown 里两个空格结尾是换行语义，不能裁掉
+trim_trailing_whitespace = false
+max_line_length = off

@@ -1,0 +1,48 @@
+# ---- Gradle / 构建产物 ----
+.gradle/
+.kotlin/
+build/
+*/build/
+**/build/
+local.properties
+# Gradle 守护进程自动生成的机器本地文件（记录本机 JDK 路径）
+gradle/gradle-daemon-jvm.properties
+
+# ---- IDE ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.cxx/
+.externalNativeBuild/
+captures/
+xcuserdata/
+
+# ---- 签名材料（严禁入库）----
+*.jks
+*.keystore
+*.p12
+*.pfx
+keystore.properties
+signing.properties
+
+# ---- 本机 JCEF natives ----
+# 解压 JCEF 发行包到 shared/libs/desktop/cef/ 后得到（含 libcef.dll 等，约 376 MB），
+# 体积巨大且是第三方二进制，不入库；clone 后按 README「桌面端构建」一节自行放置。
+shared/libs/
+
+# ---- 打包产物 ----
+*.apk
+*.aab
+*.apks
+*.ipa
+
+# ---- 仅供个人阅读的内部设计笔记（不入库）----
+README.internal.md
+
+# ---- 杂项 ----
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini

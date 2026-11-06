@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  网络安全配置（设计文档 §4.7、§8）。
+
+  为什么放开明文：本应用加载的是**用户自行添加**的站点，无法预知域名清单；
+  若禁止明文，大量仍在使用 http 的小站会直接白屏，属于功能不可用。
+  风险与缓解：明文页面只影响被访问站点自身，应用不传输任何自有账号体系数据，
+  也不得把 Cookie 写入日志或转发给第三方。
+
+  收紧路径（TODO 阶段2）：改成 <domain-config> 白名单，仅对用户显式标记为「允许 http」的域名放开明文。
+-->
+<network-security-config>
+
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <!-- 只信任系统内置 CA：用户安装的证书不参与线上站点校验 -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!--
+      debug-overrides：仅 debug 构建生效，允许信任用户安装的 CA，
+      这样本地抓包（Charles / mitmproxy）调试嗅探链路时不用改正式配置。
+    -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user" />
+            <certificates src="system" />
+        </trust-anchors>
+    </debug-overrides>
+
+</network-security-config>

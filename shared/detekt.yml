@@ -1,0 +1,96 @@
+# detekt 配置：在默认规则集基础上对齐本项目约定（见《项目初始设计.md》§5.1）。
+#
+# 本项目阶段内把 detekt 设为「仅报告、不阻断」(build.gradle 注释「待收敛后再收紧」)。
+# 这里把长期超阈值、且属本项目客观约束（WebView 封装层方法多/签名长、Compose 组件、
+# 跨平台 expect/actual 命名等）的告警，通过「阈值对齐约定 + 必要处的代码收敛」清零：
+#   - 纯代码坏味道（MagicNumber 等）优先在代码里改，不在配置里绕过；
+#   - 结构性/风格类按本阶段真实约定放宽阈值，后续要收紧时从这里逐个调低即可。
+
+naming:
+  FunctionNaming:
+    active: true
+    ignoreAnnotated:
+      - 'Composable'
+  # TabNavigation / UserAgent 等：声明名与文件名在跨平台 expect/actual 下刻意不同，非疏漏。
+  MatchingDeclarationName:
+    active: true
+    excludes:
+      - '**/TabNavigation.kt'
+      - '**/UserAgent.kt'
+  # UiDimens 顶层属性按 UI 语义命名（如 defaultMargin），非常量风格，豁免该文件。
+  TopLevelPropertyNaming:
+    active: true
+    excludes:
+      - '**/UiDimens.kt'
+
+style:
+  # 守卫式提前返回（函数开头 if (cond) return）是本项目刻意采用的写法，不计入「返回过多」；
+  # 同时把分支上限放宽到 10，覆盖广告决策/页面生命周期等真实多分支场景。
+  ReturnCount:
+    active: true
+    excludeGuardClauses: true
+    max: 10
+  # 设计文档/URL/长调用链等合法长行较多，放宽到 200（import/package/raw-string 已默认豁免）。
+  MaxLineLength:
+    active: true
+    maxLineLength: 200
+    excludeImportStatements: true
+    excludePackageStatements: true
+    excludeCommentStatements: false
+    excludeRawStrings: true
+
+complexity:
+  # WebView 控制器/构造函数/DI 图因平台 API 与组合参数，签名天然偏长；默认 6/7 过严。
+  LongParameterList:
+    active: true
+    functionThreshold: 15
+    constructorThreshold: 15
+    ignoreDefaultParameters: false
+    ignoreDataClasses: true
+  # 同样的 WebView 封装类方法多（大量 override 生命周期/回调），默认 11 过严。
+  TooManyFunctions:
+    active: true
+    # 接口要求的 override 只是契约实现（WebView 控制器有 15 个生命周期/回调方法），
+    # 不代表类自身职责膨胀；忽略后阈值只统计真正自己写的方法。
+    ignoreOverridden: true
+    thresholdInFiles: 25
+    thresholdInClasses: 25
+    thresholdInInterfaces: 25
+    thresholdInObjects: 25
+    thresholdInEnums: 25
+  # 广告决策等算法/大组合函数客观复杂，放宽圈复杂度与嵌套深度（待收敛后收紧）。
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 30
+  LongMethod:
+    active: true
+    threshold: 200
+  NestedBlockDepth:
+    active: true
+    threshold: 6
+
+exceptions:
+  # JsonRecordStore 读取块因 commonMain 无法具名平台 IOException，已在代码里 @Suppress；
+  # AppViewModel / DefaultBrowserTabPool 的宽泛 catch 为历史容忍项，暂不收紧。
+  TooGenericExceptionCaught:
+    active: true
+    excludes:
+      - '**/test/**'
+      - '**/androidTest/**'
+      - '**/commonTest/**'
+      - '**/jvmTest/**'
+      - '**/androidUnitTest/**'
+      - '**/androidInstrumentedTest/**'
+      - '**/jsTest/**'
+      - '**/iosTest/**'
+      - '**/AppViewModel.kt'
+      - '**/DefaultBrowserTabPool.kt'
+  # JsonDocumentStore.write 的原子移动兜底（ATOMIC_MOVE 不支持时退化为普通替换）是有意设计。
+  SwallowedException:
+    active: true
+    ignoredExceptionTypes:
+      - 'InterruptedException'
+      - 'MalformedURLException'
+      - 'NumberFormatException'
+      - 'ParseException'
+      - 'AtomicMoveNotSupportedException'
